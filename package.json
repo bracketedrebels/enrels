@@ -1,0 +1,25 @@
+{
+  "name": "enrels",
+  "version": "0.0.1",
+  "description": "Universal entity relationship system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bracketedrebels/enrels.git"
+  },
+  "keywords": [
+    "typescript",
+    "entity",
+    "relationship",
+    "graph"
+  ],
+  "author": "wolfson@bracketedrebels.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bracketedrebels/enrels/issues"
+  },
+  "homepage": "https://github.com/bracketedrebels/enrels#readme"
+}
