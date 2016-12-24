@@ -11,7 +11,8 @@ export class ERDomain {
      *  @argument options - link type properties.
      */
     public addLinkType(mark: string, options?: ERDomainLinkTypeOptions): void {
-        this.registerLinkTypeIfNotExists(mark, options);
+        this.validateLinkTypeExistence(mark, true);
+        this.linkTypes[mark] = assign(defaultLinkTypeOptions, options); // immutable assignation
     }
     
     /** Updates properties of already registered link type.
@@ -19,7 +20,8 @@ export class ERDomain {
      *  @argument options - new link type properties. Specified will override old ones, others will stay unchanged.
      */
     public editLinkType(mark: string, options: ERDomainLinkTypeOptions): void {
-        this.editLinkTypeIfExists(mark, options);
+        this.validateLinkTypeExistence(mark, false);
+        this.linkTypes[mark] = assign(this.linkTypes[mark] || defaultLinkTypeOptions, options); // immutable assignation
     }
 
     /** Get full list of link types names registered within the domain. */
@@ -29,9 +31,11 @@ export class ERDomain {
 
     /** Get registered link type options.
      *  @argument mark - link type name
+     *  @argument silent - if true, no exception will be throwed in case of specified link type does not exist.
      */
     public getLinkTypeInfo(mark: string, silent = false): ERDomainLinkTypeOptions | null {
-        return this.acquireLinkTypeOptions(mark, silent);
+        if (!silent) { this.validateLinkTypeExistence(mark); }
+        return this.linkTypes[mark] || null;
     }
 
     /** Detecting, whether current domain has a registered link type with specified mark or not.
@@ -78,54 +82,49 @@ export class ERDomain {
         this.removeAllLinksOfType(linkType);
     }
 
-    /**
-     * Add entity to domain.
-     * 
-     * @argument mark - entity identifier. Must be unique among all of link types within the current domain.
-     * @argument value - value to assign to entity.
+    /** Add entity to domain.
+     *  @argument mark - entity identifier. Must be unique among all of link types within the current domain.
+     *  @argument value - value to assign to entity.
      */
     public addEntity(mark: string, value?: any): void {
-
+        this.validateEntityExistence(mark, true);
+        this.graph.setNode(mark, value);
     }
 
-    /**
-     * Update entity assigned value.
-     * 
-     * @argument mark - entity identifier.
-     * @argument value - new value to assign to entity.
+    /** Update entity assigned value.
+     *  @argument mark - entity identifier.
+     *  @argument value - new value to assign to entity.
      */
-    public editEntity(mark: string, value: any): void {
-
+    public editEntity(mark: string, value?: any): void {
+        this.validateEntityExistence(mark, false);
+        this.graph.setNode(mark, value);
     }
 
-    /**
-     * Remove entity from domain. Removing entity unlinks all related entities from it.
-     * 
-     * @argument mark - entity identifier.
+    /** Detect whether an entity with specified mark exists within the domain. */
+    public hasEntity(mark: string): boolean {
+        return this.graph.hasNode(mark);
+    }
+
+    /** Remove entity from domain. Removing entity unlinks all related entities from it.
+     *  @argument mark - entity identifier.
      */
     public removeEntity(mark: string): void {
+        this.graph.removeNode(mark);
+    }
 
+    /** Acquire existed entity details.
+     *  @argument mark - entity name
+     *  @argument silent - if true, no exception will be throwed in case of specified entity does not exist.
+     */
+    public getEntityDetails(mark: string, silent = false): any | void {
+        if (!silent) { this.validateEntityExistence(mark, false); }
+        return this.graph.node(mark);
     }
 
 
 
     private graph: Graph = new Graph();
     private linkTypes: ERDomainLinkTypesDict = {};
-
-    private registerLinkTypeIfNotExists(mark: string, options?: ERDomainLinkTypeOptions): void {
-        this.validateLinkTypeExistence(mark, true);
-        this.linkTypes[mark] = assign(defaultLinkTypeOptions, options); // immutable assignation
-    }
-
-    private editLinkTypeIfExists(mark: string, options: ERDomainLinkTypeOptions): void {
-        this.validateLinkTypeExistence(mark);
-        this.linkTypes[mark] = assign(this.linkTypes[mark] || defaultLinkTypeOptions, options); // immutable assignation
-    }
-
-    private acquireLinkTypeOptions(mark: string, silent: boolean): ERDomainLinkTypeOptions | null {
-        if (!silent) { this.validateLinkTypeExistence(mark); }
-        return this.linkTypes[mark] || null;
-    }
 
     private removeAllLinksOfType(type: string): void {
 
@@ -143,6 +142,14 @@ export class ERDomain {
             throw new Error(`Link type with mark ${mark} is not registered`);
         } else if (invertValidation && mark in this.linkTypes) {
             throw new Error(`Link type with mark ${mark} already registered.`);
+        }
+    }
+
+    private validateEntityExistence(mark: string, invertValidation = false): void {
+        if (!invertValidation && !(this.graph.hasNode(mark))) {
+            throw new Error(`Entity marked as '${mark}' does not exsist.`);
+        } else if (invertValidation && this.graph.hasNode(mark)) {
+            throw new Error(`Entity marked as '${mark}' already exists.`);
         }
     }
 }
