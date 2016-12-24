@@ -1,6 +1,6 @@
 export interface ERDomainLinkTypeOptions {
-    сommunicative: boolean;
-    transitive: boolean;
+    commutative?: boolean;
+    transitive?: boolean;
 }
 
 export interface ERDomainLinkTypesDict {

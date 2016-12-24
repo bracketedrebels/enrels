@@ -1,37 +1,52 @@
 import { Graph } from 'graphlib';
+import * as assign from 'object-assign';
 
 import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces'; 
-
+import { defaultLinkTypeOptions } from './erdomain.consts';
 
 
 export class ERDomain {
-    /**
-     * Registers new link type.
-     * 
-     * @argument mark - link type name. Must be unique among all of links types within the current domain.
-     * @argument options - link type properties.
+    /** Registers new link type.
+     *  @argument mark - link type name. Must be unique among all of links types within the current domain.
+     *  @argument options - link type properties.
      */
-    public registerLinkType(mark: string, options: ERDomainLinkTypeOptions): void {
-
+    public addLinkType(mark: string, options?: ERDomainLinkTypeOptions): void {
+        this.registerLinkTypeIfNotExists(mark, options);
     }
     
-    /**
-     * Updates properties of already registered link type.
-     * 
-     * @argument mark - link type name.
-     * @argument options - new link type properties. Specified will override old ones, others will stay unchanged.
+    /** Updates properties of already registered link type.
+     *  @argument mark - link type name.
+     *  @argument options - new link type properties. Specified will override old ones, others will stay unchanged.
      */
     public editLinkType(mark: string, options: ERDomainLinkTypeOptions): void {
-
+        this.editLinkTypeIfExists(mark, options);
     }
 
-    /**
-     * Removes registered link type.
-     * 
-     * @argument mark - registered link type name.
-     */
-    public removeLinkType(mark: string):void {
+    /** Get full list of link types names registered within the domain. */
+    public getLinkTypes(): string[] {
+        return Object.keys(this.linkTypes);
+    }
 
+    /** Get registered link type options.
+     *  @argument mark - link type name
+     */
+    public getLinkTypeInfo(mark: string, silent = false): ERDomainLinkTypeOptions | null {
+        return this.acquireLinkTypeOptions(mark, silent);
+    }
+
+    /** Detecting, whether current domain has a registered link type with specified mark or not.
+     *  @argument mark - link type name
+     */
+    public hasLinkType(mark: string): boolean {
+        return mark in this.linkTypes;
+    }
+
+    /** Removes registered link type.
+     *  @argument mark - registered link type name.
+     *  @argument consistent - if true, type removing is consistent. It means, that all links of this type will be also removed.
+     */
+    public removeLinkType(mark: string, consistent = true): void {
+        this.removeLinkTypeIfRequired(mark, consistent);
     }
 
     /**
@@ -52,8 +67,15 @@ export class ERDomain {
      * @argument entities - list of entities or single entity to unlink.
      * @argument linkType - name of link type, which links of will be removed.
      */
-    public unlink(entities: string | [string, string], linkType: string): void {
+    public unlink(linkType: string, entities: string | [string, string]): void {
 
+    }
+
+    /** Removes all links of specified type within the domain.
+     *  @argument linkType - name of link type.
+     */
+    public unlinkAll(linkType: string): void {
+        this.removeAllLinksOfType(linkType);
     }
 
     /**
@@ -89,4 +111,38 @@ export class ERDomain {
 
     private graph: Graph = new Graph();
     private linkTypes: ERDomainLinkTypesDict = {};
+
+    private registerLinkTypeIfNotExists(mark: string, options?: ERDomainLinkTypeOptions): void {
+        this.validateLinkTypeExistence(mark, true);
+        this.linkTypes[mark] = assign(defaultLinkTypeOptions, options); // immutable assignation
+    }
+
+    private editLinkTypeIfExists(mark: string, options: ERDomainLinkTypeOptions): void {
+        this.validateLinkTypeExistence(mark);
+        this.linkTypes[mark] = assign(this.linkTypes[mark] || defaultLinkTypeOptions, options); // immutable assignation
+    }
+
+    private acquireLinkTypeOptions(mark: string, silent: boolean): ERDomainLinkTypeOptions | null {
+        if (!silent) { this.validateLinkTypeExistence(mark); }
+        return this.linkTypes[mark] || null;
+    }
+
+    private removeAllLinksOfType(type: string): void {
+
+    }
+
+    private removeLinkTypeIfRequired(mark: string, consistent: boolean): void {
+        if (this.linkTypes[mark]) {
+            if (consistent) { this.removeAllLinksOfType(mark); }
+            delete this.linkTypes[mark];
+        }
+    }
+
+    private validateLinkTypeExistence(mark: string, invertValidation = false): void {
+        if (!invertValidation && !(mark in this.linkTypes)) {
+            throw new Error(`Link type with mark ${mark} is not registered`);
+        } else if (invertValidation && mark in this.linkTypes) {
+            throw new Error(`Link type with mark ${mark} already registered.`);
+        }
+    }
 }
