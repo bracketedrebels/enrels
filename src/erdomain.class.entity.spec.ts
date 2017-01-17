@@ -4,7 +4,7 @@ import { ERDomain } from './erdomain.class';
 
 
 
-describe(`Entities Relationships Domain`, () => {
+describe(`Entities opertaions`, () => {
 
     let domain = new ERDomain();
     let unknown = `unknown`;

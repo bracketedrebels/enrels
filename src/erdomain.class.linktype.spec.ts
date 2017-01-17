@@ -4,12 +4,14 @@ import { ERDomain } from './erdomain.class';
 import { defaultLinkTypeOptions } from './erdomain.consts';
 
 
-describe(`Entities Relationships Domain`, () => {
+describe(`Linktypes operations`, () => {
 
     let domain = new ERDomain();
     let customized = `customized`;
     let standard = `default`;
     let configuration = { transitive: true, mutual: true };
+    let a = 'a';
+    let b = 'b';
 
     beforeAll(() => {
         domain.addLinkType(standard);
@@ -58,6 +60,9 @@ describe(`Entities Relationships Domain`, () => {
         expect(domain.hasLinkType(customized)).toBeFalsy();
     });
     it(`should successfully remove a link consistently`, () => {
-        // @TODO
+        domain.link(standard, [a, b]);
+        domain.removeLinkType(standard, true);
+        expect(domain.hasLinkType(standard)).toBeFalsy();
+        expect(domain.areLinked([a, b], standard)).toBeFalsy();
     });
 });
