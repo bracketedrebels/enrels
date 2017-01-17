@@ -12,7 +12,7 @@ export class ERDomain {
      */
     public addLinkType(mark: string, options?: ERDomainLinkTypeOptions): void {
         this.validateLinkTypeExistence(mark, true);
-        this.linkTypes[mark] = assign(defaultLinkTypeOptions, options); // immutable assignation
+        this.linkTypes[mark] = assign({}, defaultLinkTypeOptions, options); // immutable assignation
     }
     
     /** Updates properties of already registered link type.
@@ -53,32 +53,47 @@ export class ERDomain {
         this.removeLinkTypeIfRequired(mark, consistent);
     }
 
-    /**
-     * Connect two entities by link of specified type and assign specified value on on this link.
+    /** Connect two entities by link of specified type and assign specified value on this link.
      * 
-     * @argument entities - pair of strings that identify entities
-     * @argument linkType - name of link type, that will be used to link entities
-     * @argument value - value, to assign on created link
+     *  @argument entities - pair of strings that identify entities
+     *  @argument linkType - name of link type, that will be used to link entities
+     *  @argument value - value, to assign on created link
      */
-    public link(entities: [string, string], linkType: string, value?: any): void {
-
+    public link(linkType: string, entities: [string, string], value?: any): void {
+        this.linkEntities(linkType, entities, value);
     }
 
     /**
-     * If specified pair of entities, removes link of specified type between them.
-     * If specified single entity, removes all links of specified type that specified entity is source for.
+     * Gives you an information whether entities has link of specified type. If no type specified
+     * it looks for link of any type between specified entities.
      * 
-     * @argument entities - list of entities or single entity to unlink.
-     * @argument linkType - name of link type, which links of will be removed.
+     * @returns whether pair if antites connected via link of specified type.
      */
-    public unlink(linkType: string, entities: string | [string, string]): void {
-
+    public areLinked(entities: [string, string], linkType?: string): boolean {
+        return this.graph.hasEdge(entities[0], entities[1], linkType);
     }
 
-    /** Removes all links of specified type within the domain.
-     *  @argument linkType - name of link type.
+    /** 
+     * Removes a link between entities.
+     * If specified pair of entities, removes link of specified type (or all links,
+     * if no type specified) between them. If specified single entity, removes all 
+     * links of specified type (or just all links if no type specified) that specified 
+     * entity is source for.
+     * 
+     *  @argument linkType - name of link type, links of which will be removed.
+     *  @argument entities - list of entities or single entity to unlink.
      */
-    public unlinkAll(linkType: string): void {
+    public unlink(entities: string | [string, string], linkType?: string): void {
+        this.unlinkEntities(entities, linkType);
+    }
+
+    /**
+     * Removes all links of specified type (or simply all links if no type specified)
+     * within the domain.
+     * 
+     * @argument linkType - name of link type.
+     */
+    public unlinkAll(linkType?: string): void {
         this.removeAllLinksOfType(linkType);
     }
 
@@ -123,11 +138,13 @@ export class ERDomain {
 
 
 
-    private graph: Graph = new Graph();
+    private graph: Graph = new Graph({ directed: true, multigraph: true });
     private linkTypes: ERDomainLinkTypesDict = {};
 
-    private removeAllLinksOfType(type: string): void {
-
+    private removeAllLinksOfType(type?: string): void {
+        this.graph.edges()
+            .filter( edge => type !== undefined ? edge.name === type : true )
+            .forEach( edge => this.graph.removeEdge(edge) );
     }
 
     private removeLinkTypeIfRequired(mark: string, consistent: boolean): void {
@@ -151,5 +168,52 @@ export class ERDomain {
         } else if (invertValidation && this.graph.hasNode(mark)) {
             throw new Error(`Entity marked as '${mark}' already exists.`);
         }
+    }
+
+    private linkEntities(linkType: string, entities: [string, string], value?: any): void {
+        let lSource = entities[0];
+        let lTarget = entities[1];
+        if (!this.hasLinkType(linkType)) { this.addLinkType(linkType); }
+        if (!this.hasEntity(lSource)) { this.addEntity(lSource); }
+        if (!this.hasEntity(lTarget)) { this.addEntity(lTarget); }
+        let lLinkTypeInfo = this.linkTypes[linkType];
+        let lLinkEntities = lLinkTypeInfo.transitive
+            ? this.findTransitiveConnectedEntities(linkType, [lTarget], [lTarget])
+            : [lTarget];
+        lLinkEntities.forEach( v => {
+            this.graph.setEdge(lSource, v, value, linkType);
+            if (this.linkTypes[linkType].mutual) {
+                this.graph.setEdge(v, lSource, value, linkType);
+            }
+        });
+    }
+
+    private findTransitiveConnectedEntities(linkType: string, sources: string[], accumulator: string[]): string[] {
+        let lNewlyLinkedEntities: string[] = [];
+        sources.forEach( v => {
+            let lLinkedEntities = this.getLinkedEntities(v, accumulator, linkType);
+            lNewlyLinkedEntities = lNewlyLinkedEntities.concat(lLinkedEntities);
+            accumulator = accumulator.concat(lLinkedEntities);
+        } );
+        if (lNewlyLinkedEntities.length > 0) {
+            accumulator = accumulator.concat(lNewlyLinkedEntities);
+            return this.findTransitiveConnectedEntities(linkType, lNewlyLinkedEntities, accumulator);
+        }
+        return accumulator;
+    }
+
+    private getLinkedEntities(source: string, exclude: string[] = [], linkType?: string): string[] {
+        let edges = this.graph.nodeEdges( source );
+        return edges && edges
+            .filter( e => linkType ? e.name === linkType : true )
+            .map( e => e.w )
+            .filter( w => exclude.indexOf(w) < 0 );
+    }
+
+    private unlinkEntities(entities: string | [string, string], linkType?: string): void {
+        let lUnlinkingEdge = [].concat(entities);
+        let lEdgesToUnlink = this.graph.outEdges(lUnlinkingEdge[0], lUnlinkingEdge[1] || undefined);
+        lEdgesToUnlink = lEdgesToUnlink && linkType && lEdgesToUnlink.filter( edge => edge.name === linkType ) || [];
+        lEdgesToUnlink.forEach( edge => this.graph.removeEdge(edge) );
     }
 }
