@@ -1,6 +1,6 @@
 import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces'; 
 
 export const defaultLinkTypeOptions: ERDomainLinkTypeOptions = {
-    commutative: false,
+    mutual: false,
     transitive: false
 };

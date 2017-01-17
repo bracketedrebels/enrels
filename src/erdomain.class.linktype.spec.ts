@@ -9,7 +9,7 @@ describe(`Entities Relationships Domain`, () => {
     let domain = new ERDomain();
     let customized = `customized`;
     let standard = `default`;
-    let configuration = { transitive: true, commutative: true };
+    let configuration = { transitive: true, mutual: true };
 
     beforeAll(() => {
         domain.addLinkType(standard);
@@ -36,11 +36,11 @@ describe(`Entities Relationships Domain`, () => {
     });
     it(`should have ${standard} link type to be correctly defined by default`, () => {
         expect(domain.getLinkTypeInfo(standard).transitive).toEqual(defaultLinkTypeOptions.transitive);
-        expect(domain.getLinkTypeInfo(standard).commutative).toEqual(defaultLinkTypeOptions.commutative);
+        expect(domain.getLinkTypeInfo(standard).mutual).toEqual(defaultLinkTypeOptions.mutual);
     });
     it(`should have ${customized} link type to be defined correctly`, () => {
         expect(domain.getLinkTypeInfo(customized).transitive).toEqual(configuration.transitive);
-        expect(domain.getLinkTypeInfo(customized).commutative).toEqual(configuration.commutative);
+        expect(domain.getLinkTypeInfo(customized).mutual).toEqual(configuration.mutual);
     });
     it(`should throw an error if adding already registered link type`, () => {
         expect(() => domain.addLinkType(standard)).toThrowError();
@@ -49,9 +49,9 @@ describe(`Entities Relationships Domain`, () => {
         expect(() => domain.editLinkType('unregistered', {})).toThrowError();
     });
     it(`should successfully edit a registered link`, () => {
-        domain.editLinkType(customized, { commutative: !configuration.commutative });
+        domain.editLinkType(customized, { mutual: !configuration.mutual });
         expect(domain.getLinkTypeInfo(customized).transitive).toEqual(configuration.transitive);
-        expect(domain.getLinkTypeInfo(customized).commutative).toEqual(!configuration.commutative);
+        expect(domain.getLinkTypeInfo(customized).mutual).toEqual(!configuration.mutual);
     });
     it(`should successfully remove a link inconsistently`, () => {
         domain.removeLinkType(customized, false);

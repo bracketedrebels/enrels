@@ -1,5 +1,5 @@
 export interface ERDomainLinkTypeOptions {
-    commutative?: boolean;
+    mutual?: boolean;
     transitive?: boolean;
 }
 
