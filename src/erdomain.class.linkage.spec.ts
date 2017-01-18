@@ -10,7 +10,8 @@ describe(`Linkage functionality`, () => {
     let transitive = `transitive`;
     let mutual = `mutual`;
     let complex = 'transitive and mutual';
-    let a = 'a', b = 'b', c = 'c', d = 'd', e = 'e', f = 'f';
+    let a = 'a', b = 'b', c = 'c', d = 'd', e = 'e', f = 'f',
+        g = 'g', h = 'h', i = 'i', j = 'j', k = 'k', l = 'l';
 
     beforeAll(() => {
         domain.addLinkType(simple);
@@ -66,9 +67,24 @@ describe(`Linkage functionality`, () => {
         expect(domain.areLinked([a, c], complex)).toBeTruthy();
         expect(domain.areLinked([c, a], complex)).toBeTruthy();
     });
-    // it(`should corectly join ${complex} components together`, () => {
-    //     domain.link(complex, [e, f]);
-    //     domain.link(complex, [d, e]);
-    //     domain.link(complex, [c, d]);
+    it(`should corectly join ${complex} components together`, () => {
+        domain.link(complex, [e, f]);
+        domain.link(complex, [d, e]);
+        domain.link(complex, [c, d]);
+        let lConnectionsToVerify: [[string, string]] = [
+            [a, d], [d, a], [a, e], [e, a], [a, f], [f, a],
+            [b, d], [d, b], [b, e], [e, b], [b, f], [f, b],
+            [c, d], [d, c], [c, e], [e, c], [c, f], [f, c],
+        ]
+        lConnectionsToVerify.forEach( conn => {
+            expect(domain.areLinked(conn, complex)).toBeTruthy();    
+        } );
+    });
+    // it(`should corectly join ${mutual} components together`, () => {
+    //     domain.link(mutual, [g, h]);
+    //     domain.link(mutual, [h, i]);
+    //     domain.link(mutual, [j, k]);
+    //     domain.link(mutual, [k, l]);
+    //     domain.link(mutual, [i, j]);
     // });
 });
