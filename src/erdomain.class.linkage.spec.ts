@@ -5,15 +5,15 @@ import { ERDomain } from './erdomain.class';
 
 describe(`Linkage functionality`, () => {
 
-    let domain = new ERDomain();
+    let domain: ERDomain;
     let simple = `simple`;
     let transitive = `transitive`;
     let mutual = `mutual`;
     let complex = 'transitive and mutual';
-    let a = 'a', b = 'b', c = 'c', d = 'd', e = 'e', f = 'f',
-        g = 'g', h = 'h', i = 'i', j = 'j', k = 'k', l = 'l';
+    let a = 'a', b = 'b', c = 'c', d = 'd', e = 'e', f = 'f';
 
-    beforeAll(() => {
+    beforeEach(() => {
+        domain = new ERDomain();
         domain.addLinkType(simple);
         domain.addLinkType(transitive, { transitive: true });
         domain.addLinkType(mutual, { mutual: true });
@@ -28,6 +28,7 @@ describe(`Linkage functionality`, () => {
         expect(domain.areLinked([b, c], simple)).toBeTruthy();
     });
     it(`should have neither transitiveness nor mutuality when linking via ${simple} link`, () => {
+        domain.link(simple, [b, c]);
         domain.link(simple, [a, b]);
         expect(domain.areLinked([a, b], simple)).toBeTruthy();
         expect(domain.areLinked([b, a], simple)).toBeFalsy()
@@ -39,6 +40,7 @@ describe(`Linkage functionality`, () => {
         expect(domain.areLinked([c, b], mutual)).toBeTruthy();
     });
     it(`should have no transitiveness when linking via ${mutual} link`, () => {
+        domain.link(mutual, [b, c]);
         domain.link(mutual, [a, b]);
         expect(domain.areLinked([a, b], mutual)).toBeTruthy();
         expect(domain.areLinked([b, a], mutual)).toBeTruthy()
@@ -53,6 +55,8 @@ describe(`Linkage functionality`, () => {
         expect(domain.areLinked([a, c], transitive)).toBeTruthy();
     });
     it(`should have no mutuality when linking via ${transitive} link`, () => {
+        domain.link(transitive, [b, c]);
+        domain.link(transitive, [a, b]);
         expect(domain.areLinked([c, b], transitive)).toBeFalsy();
         expect(domain.areLinked([b, a], transitive)).toBeFalsy()
         expect(domain.areLinked([c, a], transitive)).toBeFalsy();
@@ -68,23 +72,41 @@ describe(`Linkage functionality`, () => {
         expect(domain.areLinked([c, a], complex)).toBeTruthy();
     });
     it(`should corectly join ${complex} components together`, () => {
+        domain.link(complex, [b, c]);
+        domain.link(complex, [a, b]);
         domain.link(complex, [e, f]);
         domain.link(complex, [d, e]);
         domain.link(complex, [c, d]);
-        let lConnectionsToVerify: [[string, string]] = [
-            [a, d], [d, a], [a, e], [e, a], [a, f], [f, a],
-            [b, d], [d, b], [b, e], [e, b], [b, f], [f, b],
-            [c, d], [d, c], [c, e], [e, c], [c, f], [f, c],
-        ]
-        lConnectionsToVerify.forEach( conn => {
+        [ [a, d], [d, a], [a, e], [e, a], [a, f], [f, a],
+          [b, d], [d, b], [b, e], [e, b], [b, f], [f, b],
+          [c, d], [d, c], [c, e], [e, c], [c, f], [f, c] ]
+        .forEach( (conn: [string, string]) => {
             expect(domain.areLinked(conn, complex)).toBeTruthy();    
         } );
     });
-    // it(`should corectly join ${mutual} components together`, () => {
-    //     domain.link(mutual, [g, h]);
-    //     domain.link(mutual, [h, i]);
-    //     domain.link(mutual, [j, k]);
-    //     domain.link(mutual, [k, l]);
-    //     domain.link(mutual, [i, j]);
-    // });
+    it(`should corectly join ${mutual} components together`, () => {
+        domain.link(mutual, [b, c]);
+        domain.link(mutual, [a, b]);
+        domain.link(mutual, [e, f]);
+        domain.link(mutual, [d, e]);
+        domain.link(mutual, [c, d]);
+        [ [b, c], [a, b], [e, f], [d, e], [c, d],
+          [c, b], [b, a], [f, e], [e, d], [d, c] ]
+        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, mutual)).toBeTruthy() );
+        [ [a, d], [a, e], [a, f], [b, d], [b, e], [b, f], [c, e], [c, f],
+          [d, a], [e, a], [f, a], [d, b], [e, b], [f, b], [e, c], [f, c] ]
+        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, mutual)).toBeFalsy() );
+    });
+    it(`should corectly join ${transitive} components together`, () => {
+        domain.link(transitive, [a, b]);
+        domain.link(transitive, [b, c]);
+        domain.link(transitive, [d, e]);
+        domain.link(transitive, [e, f]);
+        domain.link(transitive, [b, d]);
+        [ [b, c], [a, b], [e, f], [d, e], [b, d], [a, d], [a, e], [a, f], [b, e], [b, f], [a, c], [d, f]]
+        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, transitive)).toBeTruthy() );
+        [ [b, a], [c, b], [c, a], [c, d], [c, e], [c, f], [f, c], [f, d], [f, e],
+          [d, a], [d, b], [d, c], [e, a], [e, b], [e, c], [e, d], [f, a], [f, b] ]
+        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, transitive)).toBeFalsy() );
+    });
 });
