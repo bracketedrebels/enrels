@@ -1,4 +1,4 @@
-import { Graph } from 'graphlib';
+import { Graph, alg } from 'graphlib';
 import * as assign from 'object-assign';
 
 import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces'; 
@@ -176,19 +176,30 @@ export class ERDomain {
         if (!this.hasLinkType(linkType)) { this.addLinkType(linkType); }
         if (!this.hasEntity(lSource)) { this.addEntity(lSource); }
         if (!this.hasEntity(lTarget)) { this.addEntity(lTarget); }
+        let [sources, targets] = this.findConnectors(linkType, lSource, lTarget);
         let lLinkTypeInfo = this.linkTypes[linkType];
-        let lLinkEntities = lLinkTypeInfo.transitive
-            ? this.findTransitiveConnectedEntities(linkType, [lTarget], [lTarget])
-            : [lTarget];
-        lLinkEntities.forEach( v => {
-            this.graph.setEdge(lSource, v, value, linkType);
-            if (this.linkTypes[linkType].mutual) {
-                this.graph.setEdge(v, lSource, value, linkType);
-            }
-        });
+        sources.forEach( v => {
+            targets.forEach( w => {
+                this.graph.setEdge(v, w, value, linkType);
+                if (lLinkTypeInfo.mutual) {
+                    this.graph.setEdge(w, v, value, linkType);
+                }    
+            })
+        } )
     }
 
-    private findTransitiveConnectedEntities(linkType: string, sources: string[], accumulator: string[]): string[] {
+    private findConnectors(type: string, from: string, to: string): [string[], string[]] {
+        let lLinkTypeInfo = this.linkTypes[type];
+        let lSources = [from];
+        let lTargets = [to];
+        if (lLinkTypeInfo.transitive) {
+            lSources = this.findTransitiveConnectedEntities(type, lSources, lSources, true);
+            lTargets = this.findTransitiveConnectedEntities(type, lTargets, lTargets, false);
+        }
+        return [lSources, lTargets];
+    }
+
+    private findTransitiveConnectedEntities(linkType: string, sources: string[], accumulator: string[], sink?: boolean): string[] {
         let lNewlyLinkedEntities: string[] = [];
         sources.forEach( v => {
             let lLinkedEntities = this.getLinkedEntities(v, accumulator, linkType);
@@ -202,8 +213,10 @@ export class ERDomain {
         return accumulator;
     }
 
-    private getLinkedEntities(source: string, exclude: string[] = [], linkType?: string): string[] {
-        let edges = this.graph.nodeEdges( source );
+    private getLinkedEntities(source: string, exclude: string[] = [], linkType?: string, sink?: boolean): string[] {
+        let edges = sink === undefined
+            ? this.graph.nodeEdges( source )
+            : sink ? this.graph.inEdges( source ) : this.graph.outEdges( source );
         return edges && edges
             .filter( e => linkType ? e.name === linkType : true )
             .map( e => e.w )
