@@ -52,7 +52,7 @@ describe(`Entities opertaions`, () => {
     it(`should successfully edit existing entity`, () => {
         domain.editEntity(simpleLabeled, labels.simple + 1);
         expect(domain.getEntityDetails(simpleLabeled)).toEqual(labels.simple + 1);
-        let lNewComplexValue = labels.complex.map( v => v * 2 )
+        let lNewComplexValue = labels.complex.map( v => v * 2 );
         domain.editEntity(complexLabeled, lNewComplexValue);
         expect(domain.getEntityDetails(complexLabeled)).toEqual(lNewComplexValue);
     });

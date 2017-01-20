@@ -1,7 +1,7 @@
 import { Graph } from 'graphlib';
 import * as assign from 'object-assign';
 
-import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces'; 
+import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces';
 import { defaultLinkTypeOptions } from './erdomain.consts';
 
 
@@ -14,7 +14,7 @@ export class ERDomain {
         this.validateLinkTypeExistence(mark, true);
         this.linkTypes[mark] = assign({}, defaultLinkTypeOptions, options); // immutable assignation
     }
-    
+
     /** Updates properties of already registered link type.
      *  @argument mark - link type name.
      *  @argument options - new link type properties. Specified will override old ones, others will stay unchanged.
@@ -187,9 +187,9 @@ export class ERDomain {
                 this.graph.setEdge(v, w, value, linkType);
                 if (lLinkTypeInfo.mutual) {
                     this.graph.setEdge(w, v, value, linkType);
-                }    
-            })
-        } )
+                }
+            });
+        });
     }
 
     private findConnectors(type: string, from: string, to: string): [string[], string[]] {

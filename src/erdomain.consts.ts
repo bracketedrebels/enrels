@@ -1,4 +1,4 @@
-import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces'; 
+import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces';
 
 export const defaultLinkTypeOptions: ERDomainLinkTypeOptions = {
     mutual: false,

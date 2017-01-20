@@ -4,5 +4,5 @@ export interface ERDomainLinkTypeOptions {
 }
 
 export interface ERDomainLinkTypesDict {
-    [k: string]: ERDomainLinkTypeOptions
+    [k: string]: ERDomainLinkTypeOptions;
 }

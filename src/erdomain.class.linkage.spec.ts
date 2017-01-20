@@ -39,7 +39,7 @@ describe(`Linkage functionality`, () => {
         domain.link(simple, [b, c]);
         domain.link(simple, [a, b]);
         expect(domain.areLinked([a, b], simple)).toBeTruthy();
-        expect(domain.areLinked([b, a], simple)).toBeFalsy()
+        expect(domain.areLinked([b, a], simple)).toBeFalsy();
         expect(domain.areLinked([a, c], simple)).toBeFalsy();
     });
     it(`should link entities via ${mutual} link correctly`, () => {
@@ -51,7 +51,7 @@ describe(`Linkage functionality`, () => {
         domain.link(mutual, [b, c]);
         domain.link(mutual, [a, b]);
         expect(domain.areLinked([a, b], mutual)).toBeTruthy();
-        expect(domain.areLinked([b, a], mutual)).toBeTruthy()
+        expect(domain.areLinked([b, a], mutual)).toBeTruthy();
         expect(domain.areLinked([a, c], mutual)).toBeFalsy();
         expect(domain.areLinked([c, a], mutual)).toBeFalsy();
     });
@@ -66,7 +66,7 @@ describe(`Linkage functionality`, () => {
         domain.link(transitive, [b, c]);
         domain.link(transitive, [a, b]);
         expect(domain.areLinked([c, b], transitive)).toBeFalsy();
-        expect(domain.areLinked([b, a], transitive)).toBeFalsy()
+        expect(domain.areLinked([b, a], transitive)).toBeFalsy();
         expect(domain.areLinked([c, a], transitive)).toBeFalsy();
     });
     it(`should link entities via ${complex} link correctly`, () => {
@@ -87,7 +87,7 @@ describe(`Linkage functionality`, () => {
         domain.link(complex, [c, d]);
 
         combination([a, b, c, d, e, f], 2).forEach( (conn: [string, string]) => {
-            expect(domain.areLinked(conn, complex)).toBeTruthy();    
+            expect(domain.areLinked(conn, complex)).toBeTruthy();
         } );
     });
     it(`should corectly join ${mutual} components together`, () => {
@@ -96,7 +96,7 @@ describe(`Linkage functionality`, () => {
         domain.link(mutual, [e, f]);
         domain.link(mutual, [d, e]);
         domain.link(mutual, [c, d]);
-        
+
         let lTruthyLinks = [ [b, c], [a, b], [e, f], [d, e], [c, d], [c, b], [b, a], [f, e], [e, d], [d, c] ];
         let lFalsyLinks = combination([a, b, c, d, e, f], 2).filter( t => !lTruthyLinks.some( e => t.toString() === e.toString() ));
 
@@ -112,7 +112,7 @@ describe(`Linkage functionality`, () => {
 
         let lTruthyLinks = [ [b, c], [a, b], [e, f], [d, e], [b, d], [a, d], [a, e], [a, f], [b, e], [b, f], [a, c], [d, f]];
         let lFalsyLinks = combination([a, b, c, d, e, f], 2).filter( t => !lTruthyLinks.some( e => t.toString() === e.toString() ));
-        
+
         truthyPack(domain, lTruthyLinks, transitive);
         falsyPack(domain, lFalsyLinks, transitive);
     });
