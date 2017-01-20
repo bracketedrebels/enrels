@@ -34,9 +34,11 @@
     "gulp": "3.9.1",
     "gulp-jasmine": "2.4.2",
     "gulp-typescript": "3.1.3",
+    "js-combinatorics": "0.5.2",
 
     "@types/graphlib": "*",
     "@types/jasmine": "*",
-    "@types/object-assign": "*"
+    "@types/object-assign": "*",
+    "@types/js-combinatorics": "*"
   }
 }

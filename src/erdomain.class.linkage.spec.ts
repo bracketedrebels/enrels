@@ -1,7 +1,15 @@
 import 'jasmine';
 
 import { ERDomain } from './erdomain.class';
+import { combination, permutationCombination } from 'js-combinatorics';
 
+function truthyPack(domain: ERDomain, links: string[][], type: string) {
+    links.forEach( (conn: [string, string]) => expect(domain.areLinked(conn, type)).toBeTruthy() );
+}
+
+function falsyPack(domain: ERDomain, links: string[][], type: string) {
+    links.forEach( (conn: [string, string]) => expect(domain.areLinked(conn, type)).toBeFalsy() );
+}
 
 describe(`Linkage functionality`, () => {
 
@@ -77,10 +85,8 @@ describe(`Linkage functionality`, () => {
         domain.link(complex, [e, f]);
         domain.link(complex, [d, e]);
         domain.link(complex, [c, d]);
-        [ [a, d], [d, a], [a, e], [e, a], [a, f], [f, a],
-          [b, d], [d, b], [b, e], [e, b], [b, f], [f, b],
-          [c, d], [d, c], [c, e], [e, c], [c, f], [f, c] ]
-        .forEach( (conn: [string, string]) => {
+
+        combination([a, b, c, d, e, f], 2).forEach( (conn: [string, string]) => {
             expect(domain.areLinked(conn, complex)).toBeTruthy();    
         } );
     });
@@ -90,12 +96,12 @@ describe(`Linkage functionality`, () => {
         domain.link(mutual, [e, f]);
         domain.link(mutual, [d, e]);
         domain.link(mutual, [c, d]);
-        [ [b, c], [a, b], [e, f], [d, e], [c, d],
-          [c, b], [b, a], [f, e], [e, d], [d, c] ]
-        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, mutual)).toBeTruthy() );
-        [ [a, d], [a, e], [a, f], [b, d], [b, e], [b, f], [c, e], [c, f],
-          [d, a], [e, a], [f, a], [d, b], [e, b], [f, b], [e, c], [f, c] ]
-        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, mutual)).toBeFalsy() );
+        
+        let lTruthyLinks = [ [b, c], [a, b], [e, f], [d, e], [c, d], [c, b], [b, a], [f, e], [e, d], [d, c] ];
+        let lFalsyLinks = combination([a, b, c, d, e, f], 2).filter( t => !lTruthyLinks.some( e => t.toString() === e.toString() ));
+
+        truthyPack(domain, lTruthyLinks, mutual);
+        falsyPack(domain, lFalsyLinks, mutual);
     });
     it(`should corectly join ${transitive} components together`, () => {
         domain.link(transitive, [a, b]);
@@ -103,10 +109,45 @@ describe(`Linkage functionality`, () => {
         domain.link(transitive, [d, e]);
         domain.link(transitive, [e, f]);
         domain.link(transitive, [b, d]);
-        [ [b, c], [a, b], [e, f], [d, e], [b, d], [a, d], [a, e], [a, f], [b, e], [b, f], [a, c], [d, f]]
-        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, transitive)).toBeTruthy() );
-        [ [b, a], [c, b], [c, a], [c, d], [c, e], [c, f], [f, c], [f, d], [f, e],
-          [d, a], [d, b], [d, c], [e, a], [e, b], [e, c], [e, d], [f, a], [f, b] ]
-        .forEach( (conn: [string, string]) => expect(domain.areLinked(conn, transitive)).toBeFalsy() );
+
+        let lTruthyLinks = [ [b, c], [a, b], [e, f], [d, e], [b, d], [a, d], [a, e], [a, f], [b, e], [b, f], [a, c], [d, f]];
+        let lFalsyLinks = combination([a, b, c, d, e, f], 2).filter( t => !lTruthyLinks.some( e => t.toString() === e.toString() ));
+        
+        truthyPack(domain, lTruthyLinks, transitive);
+        falsyPack(domain, lFalsyLinks, transitive);
+    });
+    it(`should corectly work with ${transitive} cycles`, () => {
+        domain.link(transitive, [a, b]);
+        domain.link(transitive, [b, c]);
+        domain.link(transitive, [c, d]);
+        domain.link(transitive, [d, e]);
+        domain.link(transitive, [e, f]);
+        domain.link(transitive, [f, a]);
+
+        truthyPack(domain, combination([a, b, c, d, e, f], 2).toArray(), transitive);
+    });
+    it(`should corectly work with ${complex} cycles`, () => {
+        domain.link(complex, [a, b]);
+        domain.link(complex, [b, c]);
+        domain.link(complex, [c, d]);
+        domain.link(complex, [d, e]);
+        domain.link(complex, [e, f]);
+        domain.link(complex, [f, a]);
+
+        truthyPack(domain, combination([a, b, c, d, e, f], 2).toArray(), complex);
+    });
+    it(`should corectly work with ${mutual} cycles`, () => {
+        domain.link(mutual, [a, b]);
+        domain.link(mutual, [b, c]);
+        domain.link(mutual, [c, d]);
+        domain.link(mutual, [d, e]);
+        domain.link(mutual, [e, f]);
+        domain.link(mutual, [f, a]);
+
+        let lTruthyLinks = [ [a, b], [b, c], [c, d], [d, e], [e, f], [f, a], [b, a], [c, b], [d, c], [e, d], [f, e], [a, f] ];
+        let lFalsyLinks = combination([a, b, c, d, e, f], 2).filter( t => !lTruthyLinks.some( e => t.toString() === e.toString() ));
+
+        truthyPack(domain, lTruthyLinks, mutual);
+        falsyPack(domain, lFalsyLinks, mutual);
     });
 });
