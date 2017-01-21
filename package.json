@@ -1,0 +1,42 @@
+{
+  "name": "enrels",
+  "version": "1.0.0",
+  "description": "Universal entity relationship system",
+  "main": "dist/erdomain.class.js",
+  "types": "dist/erdomain.class.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bracketedrebels/enrels.git"
+  },
+  "keywords": [
+    "typescript",
+    "entity",
+    "relationship",
+    "graph"
+  ],
+  "author": "wolfson@bracketedrebels.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bracketedrebels/enrels/issues"
+  },
+  "homepage": "https://github.com/bracketedrebels/enrels#readme",
+  "dependencies": {
+    "graphlib": "^2.1.1",
+    "object-assign": "4.1.0"
+  },
+  "devDependencies": {
+    "@types/graphlib": "*",
+    "@types/jasmine": "*",
+    "@types/js-combinatorics": "*",
+    "@types/object-assign": "*",
+    "del": "2.2.2",
+    "gulp": "3.9.1",
+    "gulp-jasmine": "2.4.2",
+    "gulp-typescript": "3.1.3",
+    "jasmine": "^2.5.2",
+    "js-combinatorics": "0.5.2",
+    "merge2": "1.0.3",
+    "tslint": "4.3.1",
+    "typescript": "^2.1.4"
+  }
+}
