@@ -4,9 +4,6 @@
   "description": "Universal entity relationship system",
   "main": "dist/erdomain.class.js",
   "types": "dist/erdomain.class.d.ts",
-  "scripts": {
-    "postinstall": "sudo npm install --global gulp-cli"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bracketedrebels/enrels.git"
