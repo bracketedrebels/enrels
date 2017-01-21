@@ -1,7 +1,6 @@
 import 'jasmine';
 
 import { ERDomain } from './erdomain.class';
-import { defaultLinkTypeOptions } from './erdomain.consts';
 
 
 describe(`Linktypes operations`, () => {
@@ -37,8 +36,8 @@ describe(`Linktypes operations`, () => {
         expect(domain.getLinkTypeInfo('unregistered', true)).toBeNull();
     });
     it(`should have ${standard} link type to be correctly defined by default`, () => {
-        expect(domain.getLinkTypeInfo(standard).transitive).toEqual(defaultLinkTypeOptions.transitive);
-        expect(domain.getLinkTypeInfo(standard).mutual).toEqual(defaultLinkTypeOptions.mutual);
+        expect(domain.getLinkTypeInfo(standard).transitive).toEqual(false);
+        expect(domain.getLinkTypeInfo(standard).mutual).toEqual(false);
     });
     it(`should have ${customized} link type to be defined correctly`, () => {
         expect(domain.getLinkTypeInfo(customized).transitive).toEqual(configuration.transitive);

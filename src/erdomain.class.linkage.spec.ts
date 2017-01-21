@@ -1,7 +1,7 @@
 import 'jasmine';
 
 import { ERDomain } from './erdomain.class';
-import { combination, permutationCombination } from 'js-combinatorics';
+import { combination } from 'js-combinatorics';
 
 function truthyPack(domain: ERDomain, links: string[][], type: string) {
     links.forEach( (conn: [string, string]) => expect(domain.areLinked(conn, type)).toBeTruthy() );

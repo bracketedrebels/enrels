@@ -1,8 +1,6 @@
 import { Graph } from 'graphlib';
 import * as assign from 'object-assign';
 
-import { ERDomainLinkTypeOptions, ERDomainLinkTypesDict } from './erdomain.interfaces';
-import { defaultLinkTypeOptions } from './erdomain.consts';
 
 
 export class ERDomain {
@@ -12,7 +10,7 @@ export class ERDomain {
      */
     public addLinkType(mark: string, options?: ERDomainLinkTypeOptions): void {
         this.validateLinkTypeExistence(mark, true);
-        this.linkTypes[mark] = assign({}, defaultLinkTypeOptions, options); // immutable assignation
+        this.linkTypes[mark] = assign({}, { mutual: false, transitive: false }, options); // immutable assignation
     }
 
     /** Updates properties of already registered link type.
@@ -21,7 +19,7 @@ export class ERDomain {
      */
     public editLinkType(mark: string, options: ERDomainLinkTypeOptions): void {
         this.validateLinkTypeExistence(mark, false);
-        this.linkTypes[mark] = assign(this.linkTypes[mark] || defaultLinkTypeOptions, options); // immutable assignation
+        this.linkTypes[mark] = assign({}, this.linkTypes[mark], options); // immutable assignation
     }
 
     /** Get full list of link types names registered within the domain. */
@@ -141,16 +139,19 @@ export class ERDomain {
     }
 
 
-
+    // @internal
     private graph: Graph;
+    // @internal
     private linkTypes: ERDomainLinkTypesDict = {};
 
+    // @internal
     private removeAllLinksOfType(type?: string): void {
         this.graph.edges()
             .filter( edge => type !== undefined ? edge.name === type : true )
             .forEach( edge => this.graph.removeEdge(edge) );
     }
 
+    // @internal
     private removeLinkTypeIfRequired(mark: string, consistent: boolean): void {
         if (this.linkTypes[mark]) {
             if (consistent) { this.removeAllLinksOfType(mark); }
@@ -158,6 +159,7 @@ export class ERDomain {
         }
     }
 
+    // @internal
     private validateLinkTypeExistence(mark: string, invertValidation = false): void {
         if (!invertValidation && !(mark in this.linkTypes)) {
             throw new Error(`Link type with mark ${mark} is not registered`);
@@ -166,6 +168,7 @@ export class ERDomain {
         }
     }
 
+    // @internal
     private validateEntityExistence(mark: string, invertValidation = false): void {
         if (!invertValidation && !(this.graph.hasNode(mark))) {
             throw new Error(`Entity marked as '${mark}' does not exsist.`);
@@ -174,6 +177,7 @@ export class ERDomain {
         }
     }
 
+    // @internal
     private linkEntities(linkType: string, entities: [string, string], value?: any): void {
         let lSource = entities[0];
         let lTarget = entities[1];
@@ -192,6 +196,7 @@ export class ERDomain {
         });
     }
 
+    // @internal
     private findConnectors(type: string, from: string, to: string): [string[], string[]] {
         let lLinkTypeInfo = this.linkTypes[type];
         let lSources = [from];
@@ -203,32 +208,43 @@ export class ERDomain {
         return [lSources, lTargets];
     }
 
+    // @internal
     private findTransitiveConnectedEntities(linkType: string, sources: string[], sink: boolean): string[] {
         let lEntities: string[] = sources.slice();
         let lSources: string[] = sources.slice();
-        let v: string;
 
         // nonrecursive algorithm
-        while(v = lSources.pop()) {
-            this.getLinkedEntities(v, lEntities, linkType, sink)
+        while(lSources.length) {
+            this.getLinkedEntities(<string>lSources.pop(), lEntities, linkType, sink)
                 .forEach( v => (lEntities.push(v), lSources.unshift(v)) );
         }
 
         return lEntities;
     }
 
+    // @internal
     private getLinkedEntities(source: string, exclude: string[], linkType: string, sink: boolean): string[] {
         let edges = sink ? this.graph.inEdges( source ) : this.graph.outEdges( source );
         return edges && edges
             .filter( e => linkType ? e.name === linkType : true )
             .map( e => sink ? e.v : e.w )
-            .filter( w => exclude.indexOf(w) < 0 );
+            .filter( w => exclude.indexOf(w) < 0 ) || [];
     }
 
+    // @internal
     private unlinkEntities(entities: string | [string, string], linkType?: string): void {
-        let lUnlinkingEdge = [].concat(entities);
+        let lUnlinkingEdge = typeof entities === 'string' ? [entities] : entities;
         let lEdgesToUnlink = this.graph.outEdges(lUnlinkingEdge[0], lUnlinkingEdge[1] || undefined);
         lEdgesToUnlink = lEdgesToUnlink && linkType && lEdgesToUnlink.filter( edge => edge.name === linkType ) || [];
         lEdgesToUnlink.forEach( edge => this.graph.removeEdge(edge) );
     }
+}
+
+export interface ERDomainLinkTypeOptions {
+    mutual?: boolean;
+    transitive?: boolean;
+}
+
+interface ERDomainLinkTypesDict {
+    [k: string]: ERDomainLinkTypeOptions;
 }
