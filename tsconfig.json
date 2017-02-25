@@ -2,15 +2,17 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
+        "moduleResolution": "node",
         "alwaysStrict": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "stripInternal": true,
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
         "preserveConstEnums": false,
-        "declaration": true,
-        "noResolve": false
-    },
-    "files": [ "src/erdomain.class.ts" ]
+        "declaration": true
+    }
 }

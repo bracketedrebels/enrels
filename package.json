@@ -1,12 +1,12 @@
 {
   "name": "enrels",
-  "version": "1.0.0",
+  "version": "0.0.0-semantically-released",
   "description": "Universal entity relationship system",
   "main": "dist/erdomain.class.js",
   "types": "dist/erdomain.class.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bracketedrebels/enrels.git"
+    "url": "https://github.com/bracketedrebels/enrels.git"
   },
   "keywords": [
     "typescript",
@@ -37,6 +37,12 @@
     "js-combinatorics": "0.5.2",
     "merge2": "1.0.3",
     "tslint": "4.3.1",
-    "typescript": "^2.1.4"
+    "typescript": "^2.1.4",
+    "semantic-release": "^6.3.2"
+  },
+  "scripts": {
+    "test": "node ./node_modules/gulp/bin/gulp.js test",
+    "dist": "node ./node_modules/gulp/bin/gulp.js dist",
+    "release": "node ./node_modules/semantic-release/bin/semantic-release.js pre && npm publish && node ./node_modules/semantic-release/bin/semantic-release.js post"
   }
 }

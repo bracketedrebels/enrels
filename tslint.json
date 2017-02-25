@@ -4,6 +4,7 @@
 		"no-duplicate-variable": true,
 		"curly": true,
 		"class-name": true,
+		"variable-name": true,
 		"semicolon": ["always"],
 		"triple-equals": true,
 		"eofline": true,
@@ -14,6 +15,16 @@
         "no-trailing-whitespace": true,
         "no-var-keyword": true,
 		"jsdoc-format": true,
-		"max-classes-per-file": [ true, 1 ]
+		"max-classes-per-file": [ true, 1 ],
+		"no-arg": true,
+		"use-isnan": true,
+		"no-use-before-declare": true,
+		"no-unused-variable": [ true ],
+		"no-unused-new": true,
+		"no-empty": true,
+		"no-shadowed-variable": true,
+		"max-line-length": [ true, 180 ],
+		"array-type": [ true, "array-simple" ],
+		"max-file-line-count": [ true, 300 ]
 	}
 }
