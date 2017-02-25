@@ -6,7 +6,7 @@
   "types": "dist/erdomain.class.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bracketedrebels/enrels.git"
+    "url": "https://github.com/bracketedrebels/enrels.git"
   },
   "keywords": [
     "typescript",
