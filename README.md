@@ -1,4 +1,5 @@
 # enrels
-[ ![Codeship Status for bracketedrebels/enrels](https://app.codeship.com/projects/6cf3fac0-c297-0134-dbf3-22c030d3a647/status?branch=master)](https://app.codeship.com/projects/197458)
+[![Build Status](https://travis-ci.org/bracketedrebels/enrels.svg?branch=master)](https://travis-ci.org/bracketedrebels/enrels)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 Universal entity relationship system
