@@ -28,6 +28,7 @@
     "@types/jasmine": "*",
     "@types/js-combinatorics": "*",
     "@types/node": "7.0.5",
+    "js-combinatorics": "0.5.2",
     "husky": "^0.13.2",
     "jasmine": "^2.5.2",
     "lint-staged": "^3.3.1",
