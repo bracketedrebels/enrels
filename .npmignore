@@ -3,6 +3,5 @@ node_modules
 src
 .gitignore
 .travis.yml
-.gulpfile.js
-tsconfig.json
-tslint.json
+dist/*.spec.js
+dist/*.spec.d.ts

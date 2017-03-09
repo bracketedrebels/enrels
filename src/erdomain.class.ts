@@ -1,9 +1,22 @@
 import { Graph } from 'graphlib';
-import * as assign from 'object-assign';
 
 
 
 export class ERDomain {
+    // @internal
+    private graph: Graph;
+    // @internal
+    private linkTypes: ERDomainLinkTypesDict = {};
+
+    /**
+     * Creating a domain of entites and connections between them. Graph to store domain can be specified,
+     * otherwise default store will be created.
+     * @argument store - graph for storing the domain.
+     */
+    constructor(store?: Graph) {
+        this.graph = store || new Graph({ directed: true, multigraph: true });
+    }
+
     /** 
      * Registers new link type.
      * @argument mark - link type name. Must be unique among all of links types within the current domain.
@@ -12,7 +25,8 @@ export class ERDomain {
      */
     public addLinkType(mark: string, options?: ERDomainLinkTypeOptions): ERDomain {
         this.validateLinkTypeExistence(mark, true);
-        this.linkTypes[mark] = assign({}, { mutual: false, transitive: false }, options); // immutable assignation
+        let lDefaultLinkType = { mutual: false, transitive: false };
+        this.linkTypes[mark] =  Object.assign({}, lDefaultLinkType, options); // immutable assignation
         return this;
     }
 
@@ -24,7 +38,7 @@ export class ERDomain {
      */
     public editLinkType(mark: string, options: ERDomainLinkTypeOptions): ERDomain {
         this.validateLinkTypeExistence(mark, false);
-        this.linkTypes[mark] = assign({}, this.linkTypes[mark], options); // immutable assignation
+        this.linkTypes[mark] = Object.assign({}, this.linkTypes[mark], options); // immutable assignation
         return this;
     }
 
@@ -59,7 +73,8 @@ export class ERDomain {
     /** 
      * Removes registered link type.
      * @argument mark - registered link type name.
-     * @argument consistent - if true, type removing is consistent. It means, that all links of this type will be also removed.
+     * @argument consistent - if true, type removing is consistent.
+     *           It means, that all links of this type will be also removed.
      * @returns current ERDomain instance
      */
     public removeLinkType(mark: string, consistent = true): ERDomain {
@@ -170,20 +185,7 @@ export class ERDomain {
         return this.graph.node(mark);
     }
 
-    /**
-     * Creating a domain of entites and connections between them. Graph to store domain can be specified,
-     * otherwise default store will be created.
-     * @argument store - graph for storing the domain.
-     */
-    constructor(store?: Graph) {
-        this.graph = store || new Graph({ directed: true, multigraph: true });
-    }
 
-
-    // @internal
-    private graph: Graph;
-    // @internal
-    private linkTypes: ERDomainLinkTypesDict = {};
 
     // @internal
     private removeAllLinksOfType(type?: string): void {
@@ -256,7 +258,7 @@ export class ERDomain {
 
         // nonrecursive algorithm
         while(lSources.length) {
-            this.getLinkedEntities(<string>lSources.pop(), lEntities, linkType, sink)
+            this.getLinkedEntities(lSources.pop(), lEntities, linkType, sink)
                 .forEach( v => (lEntities.push(v), lSources.unshift(v)) );
         }
 
